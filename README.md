@@ -2,7 +2,7 @@
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![Python](https://img.shields.io/badge/python-3.14-blue.svg)
-![Tests](https://img.shields.io/badge/tests-108%20passing-brightgreen.svg)
+![Tests](https://img.shields.io/badge/tests-117%20passing-brightgreen.svg)
 ![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-lightgrey.svg)
 
 A cybersecurity-grade password manager and strength analyzer built entirely with the Python standard library. Generate secure passwords, test their resilience against real-world attack patterns, and manage your vault -- all from the terminal.
@@ -256,28 +256,30 @@ Run the full test suite with:
 python -m pytest -v
 ```
 
-The suite contains **108 tests** across 17 test classes:
+The suite contains **117 tests** across 20 test classes:
 
 | Test Class | Tests | Coverage |
 |---|---|---|
 | `TestRandomGeneration` | 15 | Length, charset isolation, ambiguous exclusion, uniqueness, pool size |
-| `TestPassphraseGeneration` | 12 | Word count, separators, capitalization, number/special append |
+| `TestPassphraseGeneration` | 13 | Word count, separators, capitalization, number/special append, no-duplicate dictionary |
 | `TestPinGeneration` | 7 | Length bounds, digit-only validation |
 | `TestSequentialCheck` | 6 | Forward, reverse, long runs, no-match |
 | `TestKeyboardCheck` | 5 | QWERTY, ASDF, reverse, multi-row |
-| `TestRepeatedChars` | 3 | Threshold detection, boundary cases |
+| `TestRepeatedChars` | 4 | Threshold detection, boundary cases |
 | `TestRepeatedPatterns` | 3 | `abab`, `xyzxyz`, no-pattern |
 | `TestCommonPassword` | 3 | Known-bad and unique passwords |
 | `TestDictionaryWords` | 3 | Embedded words, clean passwords |
-| `TestLeetSpeak` | 3 | `p4ssw0rd`, `@dm1n` variants |
+| `TestLeetSpeak` | 4 | `p4ssw0rd`, `@dm1n`, `adm1n` variants |
 | `TestDatePatterns` | 3 | Year detection, date formats |
 | `TestCommonCombos` | 3 | `password2024`, `admin123` |
 | `TestEmailUrl` | 3 | Email and URL embedding |
-| `TestPasswordStrength` | 16 | Full scoring, edge cases, grade boundaries |
+| `TestPasswordStrength` | 18 | Full scoring, edge cases, grade boundaries |
 | `TestBase64Storage` | 4 | Encode/decode roundtrip, Unicode |
+| `TestFileStorage` | 1 | Save/load file roundtrip |
 | `TestEstimateCrackTime` | 4 | Zero, low, high entropy, type safety |
 | `TestStrengthBar` | 3 | 0%, 50%, 100% bars |
-| `TestEdgeCases` | 7 | Min/max lengths, long passwords, special-only |
+| `TestMaskPassword` | 4 | Short/long masking, length preservation |
+| `TestEdgeCases` | 8 | Min/max lengths, long passwords, special-only |
 
 ---
 
@@ -296,7 +298,7 @@ The suite contains **108 tests** across 17 test classes:
 - [x] Vault search and management
 - [x] Ambiguous character exclusion
 - [x] Session logging with summary
-- [x] 108 automated tests
+- [x] 117 automated tests
 
 ### Under Consideration
 

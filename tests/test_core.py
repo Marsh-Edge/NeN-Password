@@ -26,6 +26,7 @@ from app.utils import (
     encode_password, decode_password, estimate_crack_time,
     strength_bar, save_passwords, load_passwords,
 )
+from Manage.management import _mask_password
 
 
 class TestRandomGeneration:
@@ -96,6 +97,9 @@ class TestRandomGeneration:
 
 
 class TestPassphraseGeneration:
+    def test_no_duplicate_words(self):
+        assert len(PASSPHRASE_WORDS) == len(set(PASSPHRASE_WORDS))
+
     def test_word_count(self):
         pw = generate_passphrase(word_count=4, add_number=False, add_special=False)
         words = pw.split('-')
@@ -270,7 +274,7 @@ class TestRepeatedPatterns:
 
 
 class TestCommonPassword:
-    def analyze_password(self):
+    def test_password(self):
         assert _is_common_password("password")
 
     def test_123456(self):
@@ -301,11 +305,15 @@ class TestLeetSpeak:
 
     def test_at_dm1n(self):
         words = _detect_leetspeak("@dm1n")
-        assert 'admln' in words or len(words) >= 0
+        assert 'admin' in words
+
+    def test_adm1n(self):
+        words = _detect_leetspeak("adm1n")
+        assert 'admin' in words
 
     def test_p4ssw0rd1(self):
         words = _detect_leetspeak("p4ssw0rd1")
-        assert 'password' in words or 'passw' in str(words)
+        assert 'password' in words
 
 
 class TestDatePatterns:
@@ -323,7 +331,7 @@ class TestDatePatterns:
 
 
 class TestCommonCombos:
-    def analyze_password2024(self):
+    def test_password2024(self):
         issues = _check_common_combos("password2024")
         assert len(issues) > 0
 
@@ -532,6 +540,29 @@ class TestStrengthBar:
         assert '50%' in bar
 
 
+class TestMaskPassword:
+    def test_short_password_fully_masked(self):
+        for pw in ["a", "ab", "abc", "abcd"]:
+            assert '*' in _mask_password(pw)
+            assert pw not in _mask_password(pw)
+
+    def test_medium_password_hides_middle(self):
+        masked = _mask_password("abcdefgh")
+        assert masked[0] == 'a'
+        assert masked[-1] == 'h'
+        assert 'bcdefg' not in masked
+
+    def test_long_password_masked(self):
+        masked = _mask_password("xK8$mP2nQz!vR")
+        assert 'xK8$' in masked
+        assert 'vR' in masked
+        assert 'mP2nQz' not in masked
+
+    def test_mask_same_length_as_password(self):
+        for pw in ["a", "ab", "abcdefgh", "xK8$mP2nQz!vR"]:
+            assert len(_mask_password(pw)) == len(pw)
+
+
 class TestEdgeCases:
     def test_very_long_random(self):
         pw = generate_random(128)
@@ -562,7 +593,7 @@ class TestEdgeCases:
             pin = generate_pin(6)
             assert len(pin) == 6
 
-    def analyze_password_with_only_special(self):
+    def test_only_special_chars(self):
         r = analyze_password("!@#$%^&*()")
         assert r['categories'] >= 1
         assert r['has_special']

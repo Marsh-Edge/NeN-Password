@@ -4,7 +4,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from app.utils import (
-    C, colorize, bold, dim, print_section, print_ok, print_warn,
+    C, colorize, dim, print_section, print_ok, print_warn,
     print_error, print_info, load_passwords, save_passwords,
 )
 
@@ -152,8 +152,10 @@ def _clear_vault(passwords: list):
 
 
 def _mask_password(pw: str) -> str:
+    if len(pw) <= 4:
+        return '*' * len(pw)
     if len(pw) <= 8:
-        return pw[:2] + '*' * (len(pw) - 2)
+        return pw[0] + '*' * (len(pw) - 2) + pw[-1]
     return pw[:4] + '*' * (len(pw) - 8) + pw[-4:]
 
 

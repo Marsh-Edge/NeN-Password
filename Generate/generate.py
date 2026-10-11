@@ -7,7 +7,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from app.utils import (
-    C, colorize, bold, dim, print_section, print_ok, print_warn, print_error,
+    C, colorize, print_section, print_ok, print_warn, print_error,
     print_info, estimate_crack_time, save_password, strength_bar,
 )
 
@@ -16,7 +16,7 @@ PASSPHRASE_WORDS = [
     "beacon", "birch", "blade", "blaze", "bloom", "bolt", "bone", "brave",
     "brick", "brook", "canyon", "cedar", "charm", "chase", "cipher", "claim",
     "cliff", "cloud", "coral", "crest", "crystal", "cumin", "dagger", "dawn",
-    "delta", "diadem", "eagle", "ember", "ember", "falcon", "fawn", "flame",
+    "delta", "diadem", "eagle", "ember", "acorn", "falcon", "fawn", "flame",
     "flint", "forge", "frost", "garnet", "glacier", "gleam", "granite", "grove",
     "hawk", "haven", "helix", "heron", "hydra", "ivory", "jade", "jungle",
     "keystone", "knight", "lance", "lark", "lemon", "linen", "lotus", "lunar",
@@ -31,9 +31,9 @@ PASSPHRASE_WORDS = [
     "unity", "valor", "vault", "venom", "vigor", "viper", "vivid", "vortex",
     "waltz", "warden", "wheat", "whirl", "whisper", "wild", "wings", "winter",
     "wolfe", "xenon", "yacht", "yield", "young", "youth", "zenith", "zephyr",
-    "zinc", "zone", "nimbus", "fable", "pixel", "raven", "steel", "brisk",
-    "cobra", "creek", "dune", "fern", "glyph", "helix", "iron", "jade",
-    "karma", "luna", "mage", "noble", "orbit", "prism", "rune", "sage",
+    "zinc", "zone", "nimbus", "fable", "pixel", "agate", "steel", "brisk",
+    "cobra", "creek", "dune", "fern", "glyph", "bison", "iron", "cobalt",
+    "karma", "luna", "mage", "comet", "diver", "fjord", "rune", "glade",
     "torque", "vex", "wisp", "yarn",
 ]
 

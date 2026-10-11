@@ -126,9 +126,11 @@ def load_passwords() -> list:
 
 def save_passwords(passwords: list):
     PASSWORDS_FILE.parent.mkdir(parents=True, exist_ok=True)
-    with open(PASSWORDS_FILE, 'w', encoding='utf-8') as f:
+    tmp = PASSWORDS_FILE.with_suffix('.tmp')
+    with open(tmp, 'w', encoding='utf-8') as f:
         for pw in passwords:
             f.write(encode_password(pw) + '\n')
+    os.replace(tmp, PASSWORDS_FILE)
 
 
 def print_header():

@@ -6,7 +6,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from app.utils import (
-    C, colorize, bold, dim, print_section, print_ok, print_warn,
+    C, colorize, print_section, print_ok, print_warn,
     print_error, print_info, estimate_crack_time, strength_bar,
 )
 
@@ -63,12 +63,14 @@ KEYBOARD_ROWS = [
     '1234567890',
 ]
 
-LEET_MAP = str.maketrans({
-    '0': 'o', '1': 'l', '2': 'z', '3': 'e', '4': 'a',
+_LEET_TRANSLATIONS = {
+    '0': 'o', '2': 'z', '3': 'e', '4': 'a',
     '5': 's', '6': 'g', '7': 't', '8': 'b', '9': 'g',
-    '@': 'a', '$': 's', '!': 'i', '+': 't', '€': 'e',
-    '£': 'l', '¥': 'y', '§': 's',
-})
+    '@': 'a', '$': 's', '!': 'i', '+': 't',
+    '€': 'e', '£': 'l', '¥': 'y', '§': 's',
+}
+LEET_MAP_ONE_AS_L = str.maketrans({**_LEET_TRANSLATIONS, '1': 'l'})
+LEET_MAP_ONE_AS_I = str.maketrans({**_LEET_TRANSLATIONS, '1': 'i'})
 
 EMAIL_PATTERN = re.compile(
     r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}'
@@ -165,16 +167,19 @@ def _find_dictionary_words(password: str) -> list:
 
 
 def _detect_leetspeak(password: str) -> list:
-    lower = password.lower()
-    deleet = lower.translate(LEET_MAP)
     found = []
-    for word in sorted(COMMON_WORDS, key=len, reverse=True):
-        if len(word) < 4:
-            continue
-        if word in deleet:
-            found.append(word)
-            deleet = deleet.replace(word, '', 1)
-    return found
+    variants = [
+        password.lower().translate(LEET_MAP_ONE_AS_L),
+        password.lower().translate(LEET_MAP_ONE_AS_I),
+    ]
+    for deleet in variants:
+        for word in sorted(COMMON_WORDS, key=len, reverse=True):
+            if len(word) < 4:
+                continue
+            if word in deleet:
+                found.append(word)
+                deleet = deleet.replace(word, '', 1)
+    return list(dict.fromkeys(found))
 
 
 def _check_date_patterns(password: str) -> list:
