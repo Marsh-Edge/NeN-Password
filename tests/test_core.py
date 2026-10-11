@@ -25,8 +25,17 @@ from Testing.test import (
 from app.utils import (
     encode_password, decode_password, estimate_crack_time,
     strength_bar, save_passwords, load_passwords,
+    colorize, bold, dim, clear_screen, C,
 )
+from app import utils as app_utils
 from Manage.management import _mask_password
+
+
+@pytest.fixture
+def restore_color():
+    original = app_utils.color_enabled()
+    yield
+    app_utils.set_color_enabled(original)
 
 
 class TestRandomGeneration:
@@ -561,6 +570,66 @@ class TestMaskPassword:
     def test_mask_same_length_as_password(self):
         for pw in ["a", "ab", "abcdefgh", "xK8$mP2nQz!vR"]:
             assert len(_mask_password(pw)) == len(pw)
+
+
+class TestColorSupport:
+    def test_no_color_env_disables(self, monkeypatch):
+        monkeypatch.setenv('NO_COLOR', '1')
+        monkeypatch.setattr(app_utils, '_enable_windows_vt', lambda: True)
+        monkeypatch.setattr(app_utils.sys.stdout, 'isatty', lambda: True)
+        assert app_utils._detect_color() is False
+
+    def test_non_tty_disables(self, monkeypatch):
+        monkeypatch.delenv('NO_COLOR', raising=False)
+        monkeypatch.setattr(app_utils, '_enable_windows_vt', lambda: True)
+        monkeypatch.setattr(app_utils.sys.stdout, 'isatty', lambda: False)
+        assert app_utils._detect_color() is False
+
+    def test_tty_enables(self, monkeypatch):
+        monkeypatch.delenv('NO_COLOR', raising=False)
+        monkeypatch.setattr(app_utils, '_enable_windows_vt', lambda: True)
+        monkeypatch.setattr(app_utils.sys.stdout, 'isatty', lambda: True)
+        assert app_utils._detect_color() is True
+
+    def test_no_vt_disables(self, monkeypatch):
+        monkeypatch.delenv('NO_COLOR', raising=False)
+        monkeypatch.setattr(app_utils, '_enable_windows_vt', lambda: False)
+        monkeypatch.setattr(app_utils.sys.stdout, 'isatty', lambda: True)
+        assert app_utils._detect_color() is False
+
+    def test_colorize_strips_codes_when_disabled(self, restore_color):
+        app_utils.set_color_enabled(False)
+        assert colorize("x", C.RED) == "x"
+        assert bold("x") == "x"
+        assert dim("x") == "x"
+
+    def test_colorize_adds_codes_when_enabled(self, restore_color):
+        app_utils.set_color_enabled(True)
+        assert '\033' in colorize("x", C.RED)
+        assert '\033' in bold("x")
+        assert '\033' in dim("x")
+
+    def test_strength_bar_plain_when_disabled(self, restore_color):
+        app_utils.set_color_enabled(False)
+        bar = strength_bar(50)
+        assert '\033' not in bar
+        assert '█' in bar
+        assert '░' in bar
+        assert '50%' in bar
+
+    def test_clear_screen_noop_when_not_tty(self, monkeypatch):
+        calls = []
+        monkeypatch.setattr(app_utils.sys.stdout, 'isatty', lambda: False)
+        monkeypatch.setattr(app_utils.os, 'system', lambda cmd: calls.append(cmd))
+        clear_screen()
+        assert calls == []
+
+    def test_clear_screen_runs_when_tty(self, monkeypatch):
+        calls = []
+        monkeypatch.setattr(app_utils.sys.stdout, 'isatty', lambda: True)
+        monkeypatch.setattr(app_utils.os, 'system', lambda cmd: calls.append(cmd))
+        clear_screen()
+        assert len(calls) == 1
 
 
 class TestEdgeCases:

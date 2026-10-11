@@ -27,19 +27,64 @@ class C:
     BG_BLUE = '\033[44m'
 
 
+def _enable_windows_vt() -> bool:
+    if os.name != 'nt':
+        return True
+    try:
+        import ctypes
+        kernel32 = ctypes.windll.kernel32
+        handle = kernel32.GetStdHandle(-11)
+        mode = ctypes.c_uint32()
+        if not kernel32.GetConsoleMode(handle, ctypes.byref(mode)):
+            return False
+        ENABLE_VIRTUAL_TERMINAL_PROCESSING = 0x0004
+        return bool(kernel32.SetConsoleMode(
+            handle, mode.value | ENABLE_VIRTUAL_TERMINAL_PROCESSING))
+    except Exception:
+        return False
+
+
+def _detect_color() -> bool:
+    if os.environ.get('NO_COLOR'):
+        return False
+    if not sys.stdout.isatty():
+        return False
+    return _enable_windows_vt()
+
+
+_COLOR_ENABLED = _detect_color()
+
+
+def set_color_enabled(value: bool):
+    global _COLOR_ENABLED
+    _COLOR_ENABLED = bool(value)
+
+
+def color_enabled() -> bool:
+    return _COLOR_ENABLED
+
+
 def colorize(text: str, color: str) -> str:
+    if not _COLOR_ENABLED:
+        return text
     return f"{color}{text}{C.RESET}"
 
 
 def bold(text: str) -> str:
+    if not _COLOR_ENABLED:
+        return text
     return f"{C.BOLD}{text}{C.RESET}"
 
 
 def dim(text: str) -> str:
+    if not _COLOR_ENABLED:
+        return text
     return f"{C.DIM}{text}{C.RESET}"
 
 
 def clear_screen():
+    if not sys.stdout.isatty():
+        return
     os.system('cls' if os.name == 'nt' else 'clear')
 
 
@@ -52,7 +97,10 @@ def strength_bar(score: int, width: int = 20) -> str:
         color = C.YELLOW
     else:
         color = C.RED
-    bar = f"{color}{'█' * filled}{C.DIM}{'░' * empty}{C.RESET}"
+    if _COLOR_ENABLED:
+        bar = f"{color}{'█' * filled}{C.DIM}{'░' * empty}{C.RESET}"
+    else:
+        bar = f"{'█' * filled}{'░' * empty}"
     return f"[{bar}] {score}%"
 
 

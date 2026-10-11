@@ -369,4 +369,7 @@ def _run_pin_mode() -> str:
 
 
 if __name__ == '__main__':
-    run()
+    try:
+        run()
+    except (KeyboardInterrupt, EOFError):
+        print()

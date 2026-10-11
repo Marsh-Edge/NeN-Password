@@ -160,4 +160,7 @@ def _mask_password(pw: str) -> str:
 
 
 if __name__ == '__main__':
-    run()
+    try:
+        run()
+    except (KeyboardInterrupt, EOFError):
+        print()

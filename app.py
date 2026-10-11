@@ -54,73 +54,82 @@ def show_session_log(log: list):
     print(colorize("  " + "=" * 52, C.CYAN))
 
 
+def _print_exit_banner():
+    print()
+    print(colorize("  " + "=" * 52, C.CYAN))
+    print(colorize("  Exiting NeN-Password Manager.", C.BOLD + C.WHITE))
+    print(colorize("  Stay secure. Never reuse passwords.", C.DIM))
+    print(colorize("  " + "=" * 52, C.CYAN))
+    print()
+
+
 def main():
     session_log = []
     last_password = None
 
-    while True:
-        print_header()
-        print_menu()
+    try:
+        while True:
+            print_header()
+            print_menu()
 
-        choice = input(f"\n  {colorize('Select', C.WHITE)} (1-4): ").strip()
+            choice = input(f"\n  {colorize('Select', C.WHITE)} (1-4): ").strip()
 
-        if choice == '1':
-            ts = datetime.now().strftime('%H:%M:%S')
-            print()
-            print_info(f"[{ts}] Password Generator")
-            pw = run_generate()
-            if pw:
-                last_password = pw
+            if choice == '1':
+                ts = datetime.now().strftime('%H:%M:%S')
+                print()
+                print_info(f"[{ts}] Password Generator")
+                pw = run_generate()
+                if pw:
+                    last_password = pw
+                    session_log.append({
+                        'time': ts,
+                        'action': 'Generated password',
+                        'detail': f'Length: {len(pw)} chars',
+                    })
+
+            elif choice == '2':
+                ts = datetime.now().strftime('%H:%M:%S')
+                print()
+                print_info(f"[{ts}] Password Tester")
+                result, was_modified = run_test(last_password=last_password)
+                if result:
+                    if was_modified:
+                        session_log.append({
+                            'time': ts,
+                            'action': 'Tested & improved password',
+                            'detail': f'{len(last_password) if last_password else 0} -> {len(result)} chars',
+                        })
+                    else:
+                        session_log.append({
+                            'time': ts,
+                            'action': 'Tested password',
+                            'detail': f'Length: {len(result)} chars',
+                        })
+                    last_password = result
+
+            elif choice == '3':
+                ts = datetime.now().strftime('%H:%M:%S')
+                print()
+                print_info(f"[{ts}] Password Vault")
+                run_manage()
                 session_log.append({
                     'time': ts,
-                    'action': 'Generated password',
-                    'detail': f'Length: {len(pw)} chars',
+                    'action': 'Accessed password vault',
                 })
 
-        elif choice == '2':
-            ts = datetime.now().strftime('%H:%M:%S')
-            print()
-            print_info(f"[{ts}] Password Tester")
-            result, was_modified = run_test(last_password=last_password)
-            if result:
-                if was_modified:
-                    session_log.append({
-                        'time': ts,
-                        'action': 'Tested & improved password',
-                        'detail': f'{len(last_password) if last_password else 0} -> {len(result)} chars',
-                    })
-                else:
-                    session_log.append({
-                        'time': ts,
-                        'action': 'Tested password',
-                        'detail': f'Length: {len(result)} chars',
-                    })
-                last_password = result
+            elif choice == '4':
+                clear_screen()
+                show_session_log(session_log)
+                _print_exit_banner()
+                break
 
-        elif choice == '3':
-            ts = datetime.now().strftime('%H:%M:%S')
-            print()
-            print_info(f"[{ts}] Password Vault")
-            run_manage()
-            session_log.append({
-                'time': ts,
-                'action': 'Accessed password vault',
-            })
-
-        elif choice == '4':
-            clear_screen()
-            show_session_log(session_log)
-            print()
-            print(colorize("  " + "=" * 52, C.CYAN))
-            print(colorize("  Exiting NeN-Password Manager.", C.BOLD + C.WHITE))
-            print(colorize("  Stay secure. Never reuse passwords.", C.DIM))
-            print(colorize("  " + "=" * 52, C.CYAN))
-            print()
-            break
-
-        else:
-            print_error("Invalid option. Enter 1-4.")
-            input(f"\n  {colorize('Press Enter to continue...', C.DIM)}")
+            else:
+                print_error("Invalid option. Enter 1-4.")
+                input(f"\n  {colorize('Press Enter to continue...', C.DIM)}")
+    except (KeyboardInterrupt, EOFError):
+        print()
+        show_session_log(session_log)
+        _print_exit_banner()
 
 
 if __name__ == '__main__':

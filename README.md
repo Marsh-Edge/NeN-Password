@@ -2,7 +2,7 @@
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![Python](https://img.shields.io/badge/python-3.14-blue.svg)
-![Tests](https://img.shields.io/badge/tests-117%20passing-brightgreen.svg)
+![Tests](https://img.shields.io/badge/tests-126%20passing-brightgreen.svg)
 ![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-lightgrey.svg)
 
 A cybersecurity-grade password manager and strength analyzer built entirely with the Python standard library. Generate secure passwords, test their resilience against real-world attack patterns, and manage your vault -- all from the terminal.
@@ -38,7 +38,9 @@ Zero dependencies. Zero network calls. Runs entirely offline with Python's `secr
 | **Email/URL Detection** | Flags passwords containing email addresses or URLs |
 | **Password Vault** | View, search, delete, and manage saved passwords with obfuscated storage |
 | **Color UI** | ANSI color-coded terminal interface with clear visual hierarchy |
+| **Adaptive Output** | Honors `NO_COLOR`, disables colors when piped/redirected, and enables Windows VT processing |
 | **Session Logging** | Tracks all actions during a session with timestamped summary on exit |
+| **Graceful Exit** | `Ctrl+C` / end-of-input exits cleanly with the session summary instead of a traceback |
 | **Zero Dependencies** | Uses only the Python standard library -- no pip install required |
 
 ---
@@ -256,7 +258,7 @@ Run the full test suite with:
 python -m pytest -v
 ```
 
-The suite contains **117 tests** across 20 test classes:
+The suite contains **126 tests** across 22 test classes:
 
 | Test Class | Tests | Coverage |
 |---|---|---|
@@ -273,13 +275,22 @@ The suite contains **117 tests** across 20 test classes:
 | `TestDatePatterns` | 3 | Year detection, date formats |
 | `TestCommonCombos` | 3 | `password2024`, `admin123` |
 | `TestEmailUrl` | 3 | Email and URL embedding |
+| `TestOnlyTwoTypes` | 3 | Two-type detection boundaries |
 | `TestPasswordStrength` | 18 | Full scoring, edge cases, grade boundaries |
 | `TestBase64Storage` | 4 | Encode/decode roundtrip, Unicode |
 | `TestFileStorage` | 1 | Save/load file roundtrip |
 | `TestEstimateCrackTime` | 4 | Zero, low, high entropy, type safety |
 | `TestStrengthBar` | 3 | 0%, 50%, 100% bars |
 | `TestMaskPassword` | 4 | Short/long masking, length preservation |
+| `TestColorSupport` | 9 | NO_COLOR, TTY detection, plain-output gating |
 | `TestEdgeCases` | 8 | Min/max lengths, long passwords, special-only |
+
+---
+
+## Environment
+
+- **`NO_COLOR`** -- set this to any value to disable ANSI colors (see [no-color.org](https://no-color.org/)). Colors are also disabled automatically when output is piped or redirected, or when the terminal does not support ANSI.
+- **Interrupts** -- `Ctrl+C` or end-of-input exits cleanly with the session summary instead of a traceback.
 
 ---
 
@@ -298,7 +309,9 @@ The suite contains **117 tests** across 20 test classes:
 - [x] Vault search and management
 - [x] Ambiguous character exclusion
 - [x] Session logging with summary
-- [x] 117 automated tests
+- [x] Graceful `Ctrl+C` / EOF handling
+- [x] `NO_COLOR` and non-TTY aware output (Windows VT support)
+- [x] 126 automated tests
 
 ### Under Consideration
 
@@ -307,7 +320,6 @@ The suite contains **117 tests** across 20 test classes:
 - [ ] Password age tracking
 - [ ] Custom word lists for passphrase generation
 - [ ] Configurable crack-time assumptions
-- [ ] Windows Terminal color profile detection
 
 ---
 
